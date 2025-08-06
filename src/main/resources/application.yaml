@@ -1,0 +1,16 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: sse gateway
+  data:
+    redis:
+      repositories:
+        enabled: false
+      cluster:
+        nodes: localhost:6379,localhost:6380,localhost:6381
+        max-redirects: 3
+
+sse:
+  channels: sse_channel
