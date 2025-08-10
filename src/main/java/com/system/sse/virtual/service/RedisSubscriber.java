@@ -1,6 +1,5 @@
-package com.gateway.sse;
+package com.system.sse.virtual.service;
 
-import com.gateway.sse.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;

@@ -1,10 +1,10 @@
-package com.gateway.sse;
+package com.system.sse;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SseGatewayApplicationTests {
+class SseSystemApplicationTests {
 	@Test
 	void contextLoads() {
 	}

@@ -2,8 +2,13 @@ server:
   port: 8090
 
 spring:
+  threads:
+    virtual:
+      enabled: true
+
   application:
-    name: sse gateway
+    name: sse-gateway
+
   data:
     redis:
       repositories:
@@ -12,5 +17,87 @@ spring:
         nodes: localhost:6379,localhost:6380,localhost:6381
         max-redirects: 3
 
-sse:
-  channels: sse_channel
+  cloud:
+    gateway:
+      globals:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+              - "https://yourdomain.com"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+
+      server:
+        webmvc:
+          routes:
+          - id: auth-route
+            uri: http://localhost:8090
+            predicates:
+              - Path=/sse/**
+            filters:
+              - name: RewritePath
+                args:
+                  regexp: ^/sse/(.*)
+                  replacement: /$1
+#
+#            - id: sse-service
+#              uri: http://localhost:8090
+#              predicates:
+#                - Path=/sse/**
+#              filters:
+#                - StripPrefix=1
+#
+#            - id: main-api-route
+#              uri: http://localhost:8082
+#              predicates:
+#                - Path=/api/main/**
+#              filters:
+#                - StripPrefix=2
+
+
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.server: DEBUG
+
+
+jwt:
+  secret: a0b1c2d3e4f506172839405060708090a0b1c2d3e4f506172839405060708090a0b1c2d3e4f506172839405060708090a
+  accessTokenValidityMs: 3600000
+  validity-ms: 3600000
+
+msa:
+  auth:
+    url: http://localhost:8090
+    timeout: 5s
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      msa-auth:
+        sliding-window-size: 100
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 10
+  ratelimiter:
+    instances:
+      auth-login:
+        limit-for-period: 10
+        limit-refresh-period: 1m
+      sse-subscribe:
+        limit-for-period: 100
+        limit-refresh-period: 1m
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
