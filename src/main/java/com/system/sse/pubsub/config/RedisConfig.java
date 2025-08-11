@@ -2,6 +2,7 @@ package com.system.sse.pubsub.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.system.sse.virtual.config.QueuedVirtualThreadExecutor;
 import com.system.sse.virtual.service.RedisSubscriber;
 import com.system.sse.virtual.service.SseEmitterService;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,7 +65,7 @@ public class RedisConfig {
     public RedisMessageListenerContainer redisMessageListenerContainer(
             RedisConnectionFactory connectionFactory,
             MessageListener redisSubscriber,
-            ExecutorService redisListenerExecutor
+            QueuedVirtualThreadExecutor redisListenerExecutor
     ) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);

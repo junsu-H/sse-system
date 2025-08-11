@@ -1,5 +1,6 @@
 package com.system.sse.virtual.controller;
 
+import com.system.sse.virtual.config.QueuedVirtualThreadExecutor;
 import com.system.sse.virtual.service.SseVirtualThreadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -14,7 +15,7 @@ import java.util.concurrent.ExecutorService;
 @RequiredArgsConstructor
 public class SseVirtualThreadController {
     private final SseVirtualThreadService sseVirtualThreadService;
-    private final ExecutorService executor;
+    private final QueuedVirtualThreadExecutor executor;
 
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(@RequestParam String userId) {
@@ -41,7 +42,7 @@ public class SseVirtualThreadController {
 
         String user = auth.getName();
         SseEmitter emitter = new SseEmitter(0L);
-        executor.submit(() -> {
+        executor.execute(() -> {
             try {
                 emitter.send(SseEmitter.event()
                         .id("init")
