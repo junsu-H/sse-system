@@ -38,7 +38,8 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/sse/**").permitAll() // gateway 통과
-                        .requestMatchers("/auth/**").permitAll() // 엔드포인트
+                        .requestMatchers("/auth").permitAll() // 엔드포인트
+                        .requestMatchers("/refresh").permitAll() // 리프레시 토큰 엔드포인트
                         .anyRequest().authenticated() // 그 외에는 인증 필요
                 )
 

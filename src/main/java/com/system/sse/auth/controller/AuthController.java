@@ -3,8 +3,10 @@ package com.system.sse.auth.controller;
 
 import com.system.sse.auth.entity.AuthRequest;
 import com.system.sse.auth.entity.AuthResponse;
+import com.system.sse.auth.entity.RefreshRequest;
 import com.system.sse.auth.entity.UserInfo;
 import com.system.sse.auth.jwt.TokenProvider;
+import com.system.sse.cache.RefreshTokenService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,24 +16,55 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @RestController
-@RequestMapping("/auth")
+@RequestMapping
 @RequiredArgsConstructor
 public class AuthController {
     private final TokenProvider tokenProvider;
 
-    @PostMapping
-    public ResponseEntity<AuthResponse> auth(@RequestBody AuthRequest request, HttpServletResponse response) {
-        final UserInfo userInfo = new UserInfo(request.sessionId());
-        String token = tokenProvider.createAccessToken(userInfo);
+    private final RefreshTokenService refreshTokenService;
 
-        // 쿠키로 토큰 내려주기
-        Cookie cookie = new Cookie("access_token", token);
-        cookie.setHttpOnly(true);          // JavaScript 접근 불가
-        cookie.setSecure(true);            // HTTPS 연결에서만 전송
-        cookie.setPath("/");
-        response.addCookie(cookie);
+    @PostMapping("/auth")
+    public ResponseEntity<AuthResponse> auth(@RequestBody AuthRequest req,
+                                             HttpServletResponse res) {
+        String sessionId = req.sessionId();
+        String accessToken = tokenProvider.createAccessToken(new UserInfo(req.accountId(), sessionId, req.uuid()));
 
-        return ResponseEntity.ok(new AuthResponse(token));
+        String refreshToken = UUID.randomUUID().toString();
+        refreshTokenService.store(sessionId, refreshToken);
+
+        addCookie(res, "access_token", accessToken);
+        addCookie(res, "refresh_token", refreshToken);
+
+        return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@RequestBody RefreshRequest req,
+                                                HttpServletResponse res) {
+        String sessionId = req.sessionId();
+        String cached = refreshTokenService.get(sessionId);
+        if (cached == null || !cached.equals(req.refreshToken())) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String newAccess = tokenProvider.createAccessToken(new UserInfo(req.accountId(), sessionId, req.uuid()));
+        String newRefresh = UUID.randomUUID().toString();
+        refreshTokenService.store(sessionId, newRefresh);
+
+        addCookie(res, "access_token", newAccess);
+        addCookie(res, "refresh_token", newRefresh);
+
+        return ResponseEntity.ok(new AuthResponse(newAccess, newRefresh));
+    }
+
+    private void addCookie(HttpServletResponse res, String name, String val) {
+        Cookie c = new Cookie(name, val);
+        c.setHttpOnly(true);
+        c.setSecure(true);
+        c.setPath("/");
+        res.addCookie(c);
     }
 }
