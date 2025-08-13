@@ -10,15 +10,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration  // 스프링 설정 클래스임을 나타냄
-@EnableWebSecurity // 스프링 시큐리티 웹 보안 활성화
+@Configuration
+@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     // 인증 실패 시 처리할 핸들러 (예: 토큰 없거나 유효하지 않을 때)
-    private final TokenAuthenticationEntryPoint entryPoint;
+    private final JwtAuthenticationEntryPoint entryPoint;
 
     // 권한 부족(403 Forbidden) 발생 시 처리할 핸들러
-    private final ForbiddenHandler accessDeniedHandler;
+    private final JwtAccessDeniedHandler accessDeniedHandler;
 
     // JWT 토큰 검증 필터
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
