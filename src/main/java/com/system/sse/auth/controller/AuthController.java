@@ -3,7 +3,7 @@ package com.system.sse.auth.controller;
 
 import com.system.sse.auth.entity.AuthRequest;
 import com.system.sse.auth.entity.AuthResponse;
-import com.system.sse.auth.entity.MsaAuth;
+import com.system.sse.auth.entity.UserInfo;
 import com.system.sse.auth.jwt.TokenProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,8 +22,8 @@ public class AuthController {
 
     @PostMapping
     public ResponseEntity<AuthResponse> auth(@RequestBody AuthRequest request, HttpServletResponse response) {
-        final MsaAuth msaAuth = new MsaAuth(request.sessionId());
-        String token = tokenProvider.createToken(msaAuth);
+        final UserInfo userInfo = new UserInfo(request.sessionId());
+        String token = tokenProvider.createAccessToken(userInfo);
 
         // 쿠키로 토큰 내려주기
         Cookie cookie = new Cookie("access_token", token);

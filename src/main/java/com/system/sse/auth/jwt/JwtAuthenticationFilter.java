@@ -1,10 +1,12 @@
 package com.system.sse.auth.jwt;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,8 +15,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -22,30 +26,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
 
     /**
-     * 이 필터를 실행하지 않을 조건을 지정하는 메서드
-     * 로그인 등 토큰 검증이 필요 없는 경로를 제외시키기 위해 사용
-     *
-     * @param request HTTP 요청 객체
-     * @return true면 필터 실행 안 함, false면 실행함
-     */
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        // "/sse/auth"로 시작하는 경로는 JWT 검증 필터를 실행하지 않음 (로그인 API 등)
-        return path.startsWith("/sse/auth") ||
-               path.startsWith("/sse/virtual");
-    }
-
-    /**
-     * 실제 JWT 토큰 검증과 인증 객체 생성 작업을 수행하는 메서드
-     * 요청 헤더에서 JWT 토큰을 추출하고 유효성을 검사한 후,
-     * 인증 정보를 SecurityContext에 저장함
-     *
-     * @param request HTTP 요청 객체
-     * @param response HTTP 응답 객체
-     * @param chain 필터 체인
-     * @throws ServletException 서블릿 예외
-     * @throws IOException 입출력 예외
+     * doFilterInternal
+     * - 실제 JWT 토큰을 검사하고 SecurityContext에 Authentication 객체를 저장
+     * - 이전 코드: SecurityContextHolder.setAuthentication 호출이 중복되어 있었음
+     * - 개선점: 인증 토큰 생성과 설정을 한 번만 수행하도록 가독성 및 성능 개선
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -53,40 +37,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
 
-        // 요청 헤더에서 Authorization 값 가져오기
+        // 1) Authorization 헤더 추출
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        // Authorization 헤더가 존재하고, "Bearer "로 시작하면 토큰을 추출
-        if (header != null && header.startsWith(TokenMessage.BEARER)) {
-            // "Bearer " 접두어 제거하고 실제 토큰 문자열만 추출
-            String token = header.substring(7);
+        // 2) "Bearer "로 시작하는지 확인
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring(7);  // 접두어 제거
 
             try {
-                // 토큰 유효성 검증 (서명 확인, 만료시간 확인 등)
+                // 3) 토큰 유효성 검증
                 if (tokenProvider.validateToken(token)) {
-                    // 토큰에서 사용자 이름(아이디) 추출
-                    String username = tokenProvider.getUsername(token);
+                    // 4) 토큰에서 사용자 식별 정보(sessionId) 추출
+                    String sessionId = tokenProvider.getSessionId(token);
 
-                    // UserDetailsService를 통해 DB 등에서 사용자 정보와 권한 로드
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(username, null, List.of());
+                    // 5) Authentication 객체 생성 (권한 정보 없으므로 emptyList)
+                    var authToken = new UsernamePasswordAuthenticationToken(
+                            sessionId,
+                            null,
+                            Collections.emptyList()
+                    );
 
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    // 6) 요청 세부정보 추가 (IP, 세션 ID 등)
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
 
-                    // 인증 객체에 요청 정보를 추가 (IP, 세션 ID 등)
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    // SecurityContext에 인증 객체 저장 -> 이후 컨트롤러, 서비스 등에서 인증된 사용자로 인식 가능
+                    // 7) SecurityContext에 인증 정보 저장
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
-            } catch (Exception ex) {
-                // JWT 파싱 및 검증 중 예외 발생 시 예외 정보를 request 속성에 저장
-                // 나중에 인증 실패 처리 로직에서 예외 정보를 사용할 수 있게 함
-                request.setAttribute(TokenMessage.EXCEPTION, ex);
+
+            } catch (ExpiredJwtException e) {
+                // 토큰 만료 예외 처리
+                log.warn("JWT expired: {}", e.getMessage());
+                request.setAttribute("EXCEPTION", e);
+
+            } catch (Exception e) {
+                // 기타 JWT 검증 실패 예외 처리
+                log.error("JWT validation failed", e);
+                request.setAttribute("EXCEPTION", e);
             }
         }
 
-        // 필터 체인 계속 진행 (다음 필터 또는 최종 목적지로 요청 전달)
+        // 8) 필터 체인 계속 진행
         chain.doFilter(request, response);
     }
 }
