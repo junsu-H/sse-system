@@ -1,4 +1,4 @@
-package com.system.sse.auth.jwt;
+package com.system.sse.security.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
