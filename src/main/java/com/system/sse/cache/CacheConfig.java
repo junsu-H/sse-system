@@ -1,27 +1,30 @@
 package com.system.sse.cache;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.Duration;
-
+import java.util.concurrent.TimeUnit;
 
 @EnableCaching
 @Configuration
 public class CacheConfig {
 
     @Bean
-    public CaffeineCacheManager cacheManager() {
-        CaffeineCacheManager cm = new CaffeineCacheManager("refreshTokens");
-        cm.setCaffeine(
-                Caffeine.newBuilder()
-                        .expireAfterWrite(Duration.ofDays(7))
-                        .maximumSize(10_000)
-        );
+    public Caffeine<Object, Object> caffeineConfig() {
+        return Caffeine.newBuilder()
+                .expireAfterWrite(7, TimeUnit.DAYS)
+                .maximumSize(10_000);
+    }
 
-        return cm;
+    @Bean
+    public CacheManager cacheManager(Caffeine<Object, Object> caffeine) {
+        CaffeineCacheManager manager = new CaffeineCacheManager("refreshTokens");
+        manager.setCaffeine(caffeine);
+
+        return manager;
     }
 }

@@ -1,5 +1,6 @@
 package com.system.sse.cache;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -23,5 +24,12 @@ public class RefreshTokenService {
     @Cacheable(value = "refreshTokens", key = "#sessionId")
     public String get(String sessionId) {
         return null;  // 실제 로직는 프레임워크가 캐시에서 가져옴
+    }
+
+    /**
+     * 캐시에서 리프레시 토큰 삭제.
+     */
+    @CacheEvict(value = "refreshTokens", key = "#sessionId")
+    public void delete(String sessionId) {
     }
 }
