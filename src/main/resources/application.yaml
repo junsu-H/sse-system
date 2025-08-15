@@ -71,8 +71,8 @@ logging:
 
 jwt:
   secret: a0b1c2d3e4f506172839405060708090a0b1c2d3e4f506172839405060708090a0b1c2d3e4f506172839405060708090a
-  accessTokenValidityMs: 3600000
-  validity-ms: 3600000
+  access-token-validity-in-ms: 3600000
+  refresh-token-validity-in-ms: 3600000
 
 msa:
   auth:

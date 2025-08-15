@@ -1,6 +1,8 @@
 package com.system.sse.security.filter;
 
-import com.system.sse.security.provider.JwtTokenProvider;
+import com.system.sse.security.provider.AccessTokenProvider;
+import com.system.sse.security.provider.JwtTokenValidator;
+import com.system.sse.security.provider.RefreshTokenProvider;
 import com.system.sse.security.resolver.TokenResolverChain;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +35,7 @@ public class AuthenticationService {
     /**
      * JwtTokenProvider: JWT 생성, 검증, 클레임 추출 등의 기능을 제공합니다.
      */
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenValidator jwtTokenValidator;
 
     /**
      * 클라이언트 요청에서 JWT를 추출·검증하고, 인증 정보를 SecurityContext에 설정합니다.
@@ -64,7 +66,7 @@ public class AuthenticationService {
      * @return 유효하면 true, 그렇지 않으면 false
      */
     private boolean isValidToken(String token) {
-        return StringUtils.hasText(token) && jwtTokenProvider.validateToken(token);
+        return StringUtils.hasText(token) && jwtTokenValidator.validateToken(token);
     }
 
     /**
@@ -78,7 +80,7 @@ public class AuthenticationService {
      */
     private Authentication buildAuthentication(String token, HttpServletRequest request) {
         // 1. 토큰에서 사용자명(claim) 추출
-        String username = jwtTokenProvider.getUsername(token);
+        String username = jwtTokenValidator.getUsername(token);
 
         // 2. 토큰에서 권한(claim) 추출하여 SimpleGrantedAuthority 리스트 생성
         List<SimpleGrantedAuthority> authorities = extractAuthorities(token);
@@ -100,7 +102,7 @@ public class AuthenticationService {
      */
     private List<SimpleGrantedAuthority> extractAuthorities(String token) {
         // 1. 콤마(,)로 구분된 권한 문자열 획득
-        String auths = jwtTokenProvider.getAuthorities(token);
+        String auths = jwtTokenValidator.getAuthorities(token);
 
         // 2. 문자열을 분할한 뒤, 빈 값은 필터링하고 SimpleGrantedAuthority로 매핑
         return Arrays.stream(auths.split(","))

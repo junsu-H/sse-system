@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -54,7 +55,7 @@ import java.util.Arrays;
 @Slf4j
 @Configuration
 @EnableWebSecurity
-//@EnableMethodSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -94,7 +95,7 @@ public class SecurityConfig {
 //                        ).permitAll()
 
                         .requestMatchers("/sse/**").permitAll() // gateway 통과
-                        .requestMatchers("/auth").permitAll() // 엔드포인트
+                        .requestMatchers("/api/**").permitAll() // 엔드포인트
                         .requestMatchers("/refresh").permitAll() // 리프레시 토큰 엔드포인트
                         .anyRequest().authenticated() // 그 외에는 인증 필요
                 )
