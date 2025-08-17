@@ -1,49 +1,63 @@
 version: '3.8'
+
 services:
-  redis-node-1:
-    image: redis:7-alpine
-    container_name: redis-node-1
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
     ports:
-      - "6379:6379"
-    command: >
-      redis-server --cluster-enabled yes --cluster-config-file nodes.conf
-      --cluster-node-timeout 5000 --appendonly yes
-      --cluster-announce-ip 127.0.0.1
-      --cluster-announce-port 6379
-      --cluster-announce-bus-port 16379
+      - "32181:32181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - data-zookeeper:/var/lib/zookeeper
+    networks:
+      - external-network
 
-  redis-node-2:
-    image: redis:7-alpine
-    container_name: redis-node-2
-    ports:
-      - "6380:6379"
-    command: >
-      redis-server --port 6379 --cluster-enabled yes --cluster-config-file nodes.conf
-      --cluster-node-timeout 5000 --appendonly yes
-      --cluster-announce-ip 127.0.0.1
-      --cluster-announce-port 6380
-      --cluster-announce-bus-port 16380
-
-  redis-node-3:
-    image: redis:7-alpine
-    container_name: redis-node-3
-    ports:
-      - "6381:6379"
-    command: >
-      redis-server --port 6379 --cluster-enabled yes --cluster-config-file nodes.conf
-      --cluster-node-timeout 5000 --appendonly yes
-      --cluster-announce-ip 127.0.0.1
-      --cluster-announce-port 6381
-      --cluster-announce-bus-port 16381
-
-  redis-cluster-init:
-    image: redis:7-alpine
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
     depends_on:
-      - redis-node-1
-      - redis-node-2
-      - redis-node-3
-    entrypoint: >
-      sh -c "
-        sleep 5 &&
-        redis-cli --cluster create 127.0.0.1:6379 127.0.0.1:6380 127.0.0.1:6381 --cluster-replicas 0 --cluster-yes
-      "
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "19092:19092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19092,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    volumes:
+      - data-kafka:/var/lib/kafka
+    networks:
+      - external-network
+
+  kafbat-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    container_name: kafbat-ui
+    ports:
+      - "9000:8080"
+    restart: always
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:19092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:32181
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    volumes:
+      - data-kafbat-ui:/var/lib/kafbat-ui
+    networks:
+      - external-network
+
+volumes:
+  data-zookeeper:
+  data-kafka:
+  data-kafbat-ui:
+
+networks:
+  external-network:
+    external: true
