@@ -31,13 +31,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-
-//    @Override
-//    protected boolean shouldNotFilter(HttpServletRequest request) {
-//        String path = request.getRequestURI();
-//        return path.startsWith("/static/") ||
-//                path.startsWith("/public/") ||
-//                path.startsWith("/actuator/") ||
-//                path.equals("/favicon.ico");
-//    }
+    /**
+     * 필터가 적용되지 않을 경로를 지정합니다.
+     * 정적 리소스, 공개 API, 헬스 체크 등은 필터링하지 않습니다.
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/static/") ||
+                path.startsWith("/public/") ||
+                path.startsWith("/actuator/") ||
+                path.equals("/favicon.ico");
+    }
 }

@@ -12,8 +12,8 @@ public class RefreshTokenService {
      * 캐시에 리프레시 토큰 저장.
      * 기존 토큰이 있으면 덮어쓴다.
      */
-    @CachePut(value = "refreshTokens", key = "#sessionId")
-    public String store(String sessionId, String refreshToken) {
+    @CachePut(key = "#username", value = "refreshTokens")
+    public String store(String username, String refreshToken) {
         return refreshToken;
     }
 
@@ -21,15 +21,15 @@ public class RefreshTokenService {
      * 캐시에서 리프레시 토큰 조회.
      * 없으면 null 반환.
      */
-    @Cacheable(value = "refreshTokens", key = "#sessionId")
-    public String get(String sessionId) {
+    @Cacheable(key = "#username", value = "refreshTokens")
+    public String get(String username) {
         return null;  // 실제 로직는 프레임워크가 캐시에서 가져옴
     }
 
     /**
      * 캐시에서 리프레시 토큰 삭제.
      */
-    @CacheEvict(value = "refreshTokens", key = "#sessionId")
-    public void delete(String sessionId) {
+    @CacheEvict(key = "#username", value = "refreshTokens")
+    public void delete(String username) {
     }
 }

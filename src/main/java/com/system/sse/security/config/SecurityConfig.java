@@ -8,14 +8,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -81,6 +80,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
+                .cors(Customizer.withDefaults())
                 // CSRF 보호 비활성화 (API 서버에서 주로 비활성화)
                 .csrf(AbstractHttpConfigurer::disable)
 
@@ -88,14 +88,9 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-//                        .dispatcherTypeMatchers(
-//                                DispatcherType.FORWARD,
-//                                DispatcherType.ERROR,
-//                                DispatcherType.ASYNC
-//                        ).permitAll()
-
                         .requestMatchers("/sse/**").permitAll() // gateway 통과
                         .requestMatchers("/api/**").permitAll() // 엔드포인트
+                        .requestMatchers("/subscribe").permitAll() // 엔드포인트
                         .requestMatchers("/refresh").permitAll() // 리프레시 토큰 엔드포인트
                         .anyRequest().authenticated() // 그 외에는 인증 필요
                 )
@@ -120,38 +115,27 @@ public class SecurityConfig {
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        // 현재 설정 그대로 사용
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // 허용할 Origin 설정 (개발: localhost, 운영: 실제 도메인)
-        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // 개발용
-        // configuration.setAllowedOrigins(Arrays.asList("https://yourdomain.com")); // 운영용
-
-        // 허용할 HTTP 메서드
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-
-        // 허용할 헤더
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://127.0.0.1:3000",
+                "http://127.0.0.1:3001"
+        ));
+        configuration.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
+        ));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-
-        // 인증 정보 허용 (쿠키, Authorization 헤더 등)
         configuration.setAllowCredentials(true);
-
-        // preflight 요청 캐시 시간 (초)
-        configuration.setMaxAge(3600L);
-
-        // 노출할 헤더 (프론트엔드에서 접근 가능한 헤더)
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Authorization-refresh"));
+//        configuration.setMaxAge(3600L);
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization", "Authorization-refresh", "Cache-Control",
+                "Content-Language", "Content-Type", "Expires", "Last-Modified", "Pragma"
+        ));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-    /**
-     * 비밀번호 암호화를 위한 PasswordEncoder 빈 등록
-     * BCrypt 알고리즘 사용 (강력한 해시 함수)
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12); // strength: 12 (기본 10보다 강화)
     }
 }
