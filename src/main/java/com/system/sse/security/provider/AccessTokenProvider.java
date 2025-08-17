@@ -1,16 +1,14 @@
 package com.system.sse.security.provider;
 
 import com.system.sse.security.config.JwtProperties;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
-public class AccessTokenProvider extends BaseJwtProvider {
+public class AccessTokenProvider extends BaseTokenProvider {
     public AccessTokenProvider(JwtProperties jwtProperties) {
         super(jwtProperties, jwtProperties.getAccessTokenValidityInMs());
     }
