@@ -1,9 +1,8 @@
 package com.system.sse.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.system.sse.emitter.EmitterData;
 import com.system.sse.service.SseEmitterService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -31,7 +30,7 @@ public class KafkaMessageConsumer {
 
             String userId = String.valueOf(event.getAccountId());
             String eventName = event.getEventName();
-            Object data = event.getData();
+            final EmitterData data = event.getData();
 
             log.info("=== 파싱된 이벤트 정보 ===");
             log.info("UserId: {}", userId);
@@ -52,15 +51,5 @@ public class KafkaMessageConsumer {
         } catch (Exception e) {
             log.error("Kafka Consumer: Failed to process record {}: {}", record, e.getMessage(), e);
         }
-    }
-
-    @Data
-    @AllArgsConstructor
-    static class EventMessage {
-        private String id;
-        private Long accountId;
-        private String eventName;
-        private Object data;
-        private long timestamp;
     }
 }
