@@ -1,8 +1,8 @@
-package com.system.sse;
+package com.system.sse.controller;
 
 import com.system.sse.cookie.CookieConfig;
 import com.system.sse.cookie.CookieUtils;
-import com.system.sse.emitter.SseEmitterService;
+import com.system.sse.service.SseEmitterService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

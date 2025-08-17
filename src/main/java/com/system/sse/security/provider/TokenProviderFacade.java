@@ -1,6 +1,6 @@
 package com.system.sse.security.provider;
 
-import com.system.sse.cache.RefreshTokenService;
+import com.system.sse.service.RefreshTokenCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,7 +14,7 @@ import java.util.Collection;
 public class TokenProviderFacade {
     private final AccessTokenProvider accessTokenProvider;
     private final RefreshTokenProvider refreshTokenProvider;
-    private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenCacheService refreshTokenCacheService;
 
     public JwtTokenResult createToken(String username, String credential, Collection<? extends GrantedAuthority> authorities) {
         Authentication auth = new UsernamePasswordAuthenticationToken(
@@ -30,7 +30,7 @@ public class TokenProviderFacade {
         String refreshToken = refreshTokenProvider.createRefreshToken(auth);
 
         // refreshToken 저장
-        refreshTokenService.store(username, refreshToken);
+        refreshTokenCacheService.store(username, refreshToken);
 
         return JwtTokenResult.builder()
                 .accessToken(accessToken)

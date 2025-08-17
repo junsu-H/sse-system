@@ -1,4 +1,4 @@
-package com.system.sse;
+package com.system.sse.controller;
 
 import com.system.sse.cookie.CookieConfig;
 import com.system.sse.cookie.CookieUtils;

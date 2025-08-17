@@ -1,6 +1,6 @@
 package com.system.sse.security.provider;
 
-import com.system.sse.cache.RefreshTokenService;
+import com.system.sse.service.RefreshTokenCacheService;
 import com.system.sse.security.entity.AuthRequest;
 import com.system.sse.security.entity.AuthResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class TokenAuthenticationService {
     private final TokenProviderFacade tokenProviderFacade;
-    private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenCacheService refreshTokenCacheService;
     private final JwtTokenParser jwtTokenParser;
 
     /**
@@ -27,7 +27,7 @@ public class TokenAuthenticationService {
         final JwtTokenResult token = tokenProviderFacade.createToken(request.getUsername(), sessionId, authorities);
 
         // Refresh Token 저장
-        refreshTokenService.store(request.getUsername(), token.refreshToken());
+        refreshTokenCacheService.store(request.getUsername(), token.refreshToken());
 
         return new AuthResponse(token.accessToken(), token.refreshToken());
     }
@@ -46,7 +46,7 @@ public class TokenAuthenticationService {
         String sessionId = jwtTokenParser.getCredential(refreshToken);
 
         // 저장된 리프레시 토큰과 일치 여부 확인
-        String cachedRefreshToken = refreshTokenService.get(username);
+        String cachedRefreshToken = refreshTokenCacheService.get(username);
         if (!refreshToken.equals(cachedRefreshToken)) {
             throw new IllegalArgumentException("저장된 Refresh Token과 일치하지 않습니다.");
         }

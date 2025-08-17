@@ -1,4 +1,4 @@
-package com.system.sse.cache;
+package com.system.sse.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 @EnableCaching
 @Configuration
-public class CacheConfig {
+public class CacheConfiguration {
 
     @Bean
     public Caffeine<Object, Object> caffeineConfig() {

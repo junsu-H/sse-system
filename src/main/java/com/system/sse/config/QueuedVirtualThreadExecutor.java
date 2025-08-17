@@ -1,4 +1,4 @@
-package com.system.sse.virtual.config;
+package com.system.sse.config;
 
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;

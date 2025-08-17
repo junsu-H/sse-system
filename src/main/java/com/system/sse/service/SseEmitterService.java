@@ -1,4 +1,4 @@
-package com.system.sse.emitter;
+package com.system.sse.service;
 
 import com.system.sse.security.provider.JwtTokenParser;
 import io.jsonwebtoken.Claims;

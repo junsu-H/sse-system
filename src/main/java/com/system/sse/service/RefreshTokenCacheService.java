@@ -1,4 +1,4 @@
-package com.system.sse.cache;
+package com.system.sse.service;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -6,7 +6,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RefreshTokenService {
+public class RefreshTokenCacheService {
 
     /**
      * 캐시에 리프레시 토큰 저장.

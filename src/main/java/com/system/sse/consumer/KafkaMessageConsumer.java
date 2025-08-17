@@ -1,7 +1,7 @@
-package com.system.sse;
+package com.system.sse.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.system.sse.emitter.SseEmitterService;
+import com.system.sse.service.SseEmitterService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

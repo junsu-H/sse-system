@@ -1,7 +1,7 @@
-package com.system.sse;
+package com.system.sse.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.system.sse.emitter.SseEmitterService;
+import com.system.sse.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
