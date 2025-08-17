@@ -1,9 +1,10 @@
 package com.system.sse.security.resolver;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-//@Component
+@Component("headerResolver")
 public class HeaderTokenResolver implements TokenResolver {
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";

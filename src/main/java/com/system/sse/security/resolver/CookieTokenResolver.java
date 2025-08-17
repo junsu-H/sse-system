@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-@Component
+@Component("cookieResolver")
 public class CookieTokenResolver implements TokenResolver {
     private static final String ACCESS_TOKEN = "access_token";
 

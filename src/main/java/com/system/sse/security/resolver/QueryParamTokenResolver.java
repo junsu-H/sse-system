@@ -1,9 +1,10 @@
 package com.system.sse.security.resolver;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-//@Component
+@Component("queryParamResolver")
 public class QueryParamTokenResolver implements TokenResolver {
     private static final String PARAM_NAME = "token";
 

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class TokenResolverChain {
+public class CompositeTokenResolver implements TokenResolver {
     private final List<TokenResolver> resolvers;
 
     public String resolve(HttpServletRequest request) {
