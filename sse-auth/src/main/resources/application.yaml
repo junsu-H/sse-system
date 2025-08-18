@@ -1,0 +1,12 @@
+spring:
+  threads:
+    virtual:
+      enabled: true
+
+  application:
+    name: sse-auth
+
+jwt:
+  secret: a0b1c2d3e4f506172839405060708090a0b1c2d3e4f506172839405060708090a0b1c2d3e4f506172839405060708090a
+  access-token-validity-in-ms: 3600000
+  refresh-token-validity-in-ms: 3600000

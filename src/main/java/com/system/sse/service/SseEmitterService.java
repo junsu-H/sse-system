@@ -1,7 +1,6 @@
 package com.system.sse.service;
 
-import com.system.sse.security.provider.JwtTokenParser;
-import io.jsonwebtoken.Claims;
+import com.system.auth.provider.JwtTokenParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -52,8 +51,7 @@ public class SseEmitterService {
         }
 
         // 2) 토큰에서 만료 시각(exp) 파싱
-        Claims claims = jwtTokenParser.getClaims(token);
-        Instant expiry = claims.getExpiration().toInstant();
+        Instant expiry = jwtTokenParser.getExpiration(token);
 
         // 3) 구독 등록
         emitter.onCompletion(() -> removeEmitter(userId));

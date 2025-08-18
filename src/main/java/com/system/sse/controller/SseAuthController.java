@@ -1,19 +1,17 @@
 package com.system.sse.controller;
 
+import com.system.auth.config.JwtProperties;
+import com.system.auth.entity.AuthRequest;
+import com.system.auth.entity.AuthResponse;
+import com.system.auth.provider.TokenAuthenticationService;
 import com.system.sse.cookie.CookieConfig;
 import com.system.sse.cookie.CookieUtils;
-import com.system.sse.security.config.JwtProperties;
-import com.system.sse.security.entity.AuthRequest;
-import com.system.sse.security.entity.AuthResponse;
-import com.system.sse.security.provider.TokenAuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,10 +32,7 @@ public class SseAuthController {
     public ResponseEntity<AuthResponse> auth(@RequestBody AuthRequest request,
                                               HttpServletResponse response) {
         try {
-            Collection<? extends GrantedAuthority> authorities =
-                    List.of(new SimpleGrantedAuthority("ROLE_USER"));
-
-            AuthResponse authResponse = tokenAuthenticationService.authenticate(request, authorities);
+            AuthResponse authResponse = tokenAuthenticationService.authenticate(request);
 
             // 쿠키 설정
             CookieUtils.addCookie(response,
@@ -87,11 +82,8 @@ public class SseAuthController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 
-            Collection<? extends GrantedAuthority> authorities =
-                    List.of(new SimpleGrantedAuthority("ROLE_USER"));
-
             // 토큰 갱신
-            AuthResponse authResponse = tokenAuthenticationService.refreshAccessToken(refreshToken, authorities);
+            AuthResponse authResponse = tokenAuthenticationService.refreshAccessToken(refreshToken);
 
             // 새 쿠키 설정
             CookieUtils.addCookie(response,

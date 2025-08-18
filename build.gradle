@@ -13,6 +13,12 @@ java {
 	}
 }
 
+subprojects {
+	repositories {
+		mavenCentral()
+	}
+}
+
 repositories {
 	mavenCentral()
 }
@@ -22,17 +28,15 @@ ext {
 }
 
 dependencies {
+	// 내부 auth 모듈 의존
+	implementation project(':sse-auth')
+
 	// ── 웹/게이트웨이 ───────────────────────────────
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-gateway-server-webmvc'
 
 	// Spring Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-
-	// JWT (jjwt)
-	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
-	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
-	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
 	// cache
 	implementation 'org.springframework.boot:spring-boot-starter-cache'

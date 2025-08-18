@@ -17,35 +17,38 @@ spring:
         nodes: localhost:6379,localhost:6380,localhost:6381
         max-redirects: 3
 
-  cloud:
-    gateway:
-      globals:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:3000"
-              - "https://yourdomain.com"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
+#  cloud:
+#    gateway:
+#      server:
+#        webmvc:
+#          routes:
+#            - id: auth-route
+#              uri: http://localhost:8090
+#              predicates:
+#                - Path=/sse/**
+#              filters:
+#                - name: RewritePath
+#                  args:
+#                    regexp: ^/sse/(.*)
+#                    replacement: /$1
+#      # globals → globalcors 수정
+#      globalcors:
+#        cors-configurations:
+#          '[/**]':
+#            allowedOriginPatterns:
+#              - "http://localhost:3001"
+#              - "http://127.0.0.1:3001"
+#              - "https://yourdomain.com"
+#            allowedMethods:
+#              - GET
+#              - POST
+#              - PUT
+#              - DELETE
+#              - OPTIONS
+#            allowedHeaders: "*"
+#            allowCredentials: true
+#            maxAge: 3600
 
-      server:
-        webmvc:
-          routes:
-          - id: auth-route
-            uri: http://localhost:8090
-            predicates:
-              - Path=/sse/**
-            filters:
-              - name: RewritePath
-                args:
-                  regexp: ^/sse/(.*)
-                  replacement: /$1
 #
 #            - id: sse-service
 #              uri: http://localhost:8090
@@ -65,14 +68,9 @@ spring:
 
 logging:
   level:
+    org.springframework.web.cors: DEBUG
     org.springframework.cloud.gateway: DEBUG
-    reactor.netty.http.server: DEBUG
-
-
-jwt:
-  secret: a0b1c2d3e4f506172839405060708090a0b1c2d3e4f506172839405060708090a0b1c2d3e4f506172839405060708090a
-  access-token-validity-in-ms: 3600000
-  refresh-token-validity-in-ms: 3600000
+    root: INFO
 
 msa:
   auth:
