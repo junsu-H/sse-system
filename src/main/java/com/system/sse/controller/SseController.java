@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Slf4j
@@ -34,7 +35,7 @@ public class SseController {
     public SseEmitter subscribe(
             HttpServletRequest request,
             Authentication authentication,
-            @RequestHeader(value = "last-event-id", required = false) String lastEventIdHeader) {
+            @RequestHeader(value = "last-event-id", required = false) String lastEventIdHeader) throws IOException {
 
         String userId = authentication.getName();
         Long lastOffset = null;
@@ -46,6 +47,7 @@ public class SseController {
             }
         }
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        emitter.send(SseEmitter.event().name("INIT").data("connected"));
 
         final Optional<String> cookieValue = CookieUtils.getCookieValue(request, new CookieConfig(
                 "access_token",
