@@ -1,5 +1,3 @@
 rootProject.name = 'sse-system'
 
 include 'sse-auth'
-
-include 'sse-auth'

@@ -88,6 +88,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/**").permitAll() // gateway 통과
                         .requestMatchers("/sse/**").permitAll() // gateway 통과
                         .requestMatchers("/api/**").permitAll() // 엔드포인트
                         .requestMatchers("/subscribe").permitAll() // 엔드포인트
