@@ -84,19 +84,28 @@ msa:
 resilience4j:
   circuitbreaker:
     instances:
-      msa-auth:
-        sliding-window-size: 100
-        failure-rate-threshold: 50
-        wait-duration-in-open-state: 10s
-        permitted-number-of-calls-in-half-open-state: 10
+      msa-auth:                # 인증 서비스(msa-auth) 호출 보호용 Circuit Breaker
+        sliding-window-size: 100                # 최근 100개 호출을 기준으로 통계 계산
+        failure-rate-threshold: 50              # 실패율이 50% 넘으면 Circuit 열림(Open)
+        wait-duration-in-open-state: 10s        # Open 상태 유지 시간 (10초 후 Half-Open으로 전환)
+        permitted-number-of-calls-in-half-open-state: 10  # Half-Open 상태에서 테스트 호출 허용 개수
+
   ratelimiter:
     instances:
-      auth-login:
-        limit-for-period: 10
-        limit-refresh-period: 1m
-      sse-subscribe:
-        limit-for-period: 100
-        limit-refresh-period: 1m
+      auth-login:              # 로그인 API 호출에 대한 Rate Limiter
+        limit-for-period: 10                   # 1분 동안 최대 10번 호출 허용
+        limit-refresh-period: 1m               # 매 1분마다 카운터 초기화
+        # timeout-duration 기본값(5s)이 적용됨 → 초과 시 최대 5초 대기 가능
+
+      sse-subscribe:           # SSE 구독 요청에 대한 Rate Limiter
+        limit-for-period: 100                  # 1분 동안 최대 100번 허용
+        limit-refresh-period: 1m               # 매 1분마다 초기화
+        # timeout-duration 기본값(5s) 적용
+
+      global:                  # 전역 Rate Limiter (모든 Controller 공통 적용)
+        limit-for-period: 10000                # 초당 10000 요청 허용
+        limit-refresh-period: 1s               # 매 초마다 카운터 초기화
+        timeout-duration: 0                    # 대기하지 않고 바로 실패(즉시 429 반환)
 
 management:
   endpoints:
