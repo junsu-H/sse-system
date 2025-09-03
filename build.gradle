@@ -49,7 +49,6 @@ ext {
 dependencies {
 	// 내부 auth 모듈 의존
 	implementation project(':sse-main')
-	implementation project(':sse-auth')
 	implementation project(':sse-sender')
 	implementation project(':sse-application')
 

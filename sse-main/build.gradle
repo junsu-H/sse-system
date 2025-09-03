@@ -10,7 +10,6 @@ description = 'sse-main'
 
 dependencies {
     implementation project (':sse-application')
-    implementation project (':sse-auth')
     implementation project (':sse-sender')
 }
 

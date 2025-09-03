@@ -2,6 +2,5 @@ rootProject.name = 'sse-system'
 
 include 'sse-main'
 include 'sse-application'
-include 'sse-auth'
 
 include 'sse-sender'
