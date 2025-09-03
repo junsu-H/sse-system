@@ -1,0 +1,17 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+group = 'com.system.sse'
+version = '0.0.1-SNAPSHOT'
+description = 'sse-main'
+
+dependencies {
+    implementation project (':sse-application')
+    implementation project (':sse-auth')
+    implementation project (':sse-sender')
+}
+
+tasks.register("prepareKotlinBuildScriptModel")

@@ -14,8 +14,27 @@ java {
 }
 
 subprojects {
+	apply plugin: 'java'
+	apply plugin: 'io.spring.dependency-management'
+	apply plugin: 'org.springframework.boot'
+
 	repositories {
 		mavenCentral()
+	}
+
+	dependencies {
+		// Lombok
+		compileOnly 'org.projectlombok:lombok'
+		annotationProcessor 'org.projectlombok:lombok'
+
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.springframework.boot:spring-boot-starter'
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	}
+
+	tasks.named('test') {
+		useJUnitPlatform()
 	}
 }
 
@@ -29,30 +48,13 @@ ext {
 
 dependencies {
 	// 내부 auth 모듈 의존
+	implementation project(':sse-main')
 	implementation project(':sse-auth')
+	implementation project(':sse-sender')
+	implementation project(':sse-application')
 
-	// ── 웹/게이트웨이 ───────────────────────────────
-	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-gateway-server-webmvc'
 
-	// Spring Security
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-
-	// cache
-	implementation 'org.springframework.boot:spring-boot-starter-cache'
-	implementation 'com.github.ben-manes.caffeine:caffeine:3.2.0'
-
-	// Lombok
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-
-	// kafka
-	implementation 'org.springframework.kafka:spring-kafka'
-	
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
